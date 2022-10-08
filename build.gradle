@@ -1,14 +1,16 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
-group 'fr.diskmth.loggy'
-version '1.0'
+group = project.property('group')
+version = project.property('version')
+archivesBaseName = project.property('fileName')
 
 compileJava {
     options.encoding = "UTF-8"
-    sourceCompatibility = 17
-    targetCompatibility = 17
+    sourceCompatibility = project.property('javaVersion')
+    targetCompatibility = project.property('javaVersion')
 }
 
 repositories {
@@ -17,4 +19,44 @@ repositories {
 
 dependencies {
 
+}
+
+jar {
+    manifest {
+        attributes(
+                'Name'     :  project.property('fileName'),
+                'Version'   : project.property('version'),
+                'Java-version'   : project.property('javaVersion'),
+                'Authors'    : project.property('authors'),
+                'Credits'   : project.property('credits'),
+                'Description'   : project.property('description'),
+        )
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = project.property('group')
+            artifactId = project.property('fileName')
+            version = project.property('version')
+            from components.java
+
+            pom {
+                name = project.property('fileName')
+                description = project.property('description')
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            credentials {
+                username = ''
+                password = ''
+            }
+
+            url = ''
+        }
+    }
 }
