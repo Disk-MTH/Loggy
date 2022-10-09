@@ -11,19 +11,6 @@ import java.util.logging.FileHandler;
 public class LogsFile
 {
     public static final String DATE = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss").format(Calendar.getInstance().getTime());
-    public static final Path JAR_PATH;
-
-    static
-    {
-        try
-        {
-            JAR_PATH = Path.of(Logger.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-        }
-        catch (URISyntaxException exception)
-        {
-            throw new RuntimeException(exception);
-        }
-    }
 
     protected final Logger logger;
     protected final Path path;
@@ -35,11 +22,6 @@ public class LogsFile
         this.logger = logger;
         this.path = path;
         this.fileName = fileName;
-    }
-
-    public LogsFile(Logger logger)
-    {
-        this(logger, Path.of(JAR_PATH + "/logs"), DATE + ".log");
     }
 
     public void init()
