@@ -46,7 +46,7 @@ public class LogsFile
 
     }
 
-    public void exit()
+    public void close()
     {
         if (fileHandler != null)
         {

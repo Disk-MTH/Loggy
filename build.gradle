@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id 'maven-publish'
 }
 
 group = project.property('group')
@@ -31,32 +30,5 @@ jar {
                 'Credits'   : project.property('credits'),
                 'Description'   : project.property('description'),
         )
-    }
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId = project.property('group')
-            artifactId = project.property('fileName')
-            version = project.property('version')
-            from components.java
-
-            pom {
-                name = project.property('fileName')
-                description = project.property('description')
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            credentials {
-                username = ''
-                password = ''
-            }
-
-            url = ''
-        }
     }
 }

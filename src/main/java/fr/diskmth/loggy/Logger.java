@@ -27,7 +27,10 @@ public class Logger
     {
         for (LogsFile file : files)
         {
-            LOGGER.addHandler(file.getFileHandler());
+            if (file != null)
+            {
+                LOGGER.addHandler(file.getFileHandler());
+            }
         }
     }
 
@@ -35,7 +38,10 @@ public class Logger
     {
         for (LogsFile file : files)
         {
-            LOGGER.removeHandler(file.getFileHandler());
+            if (file != null)
+            {
+                LOGGER.removeHandler(file.getFileHandler());
+            }
         }
     }
 
