@@ -5,6 +5,7 @@ import java.util.logging.ConsoleHandler;
 public class Logger
 {
     private boolean verbose = true;
+    private boolean mute = false;
 
     protected final java.util.logging.Logger LOGGER;
 
@@ -55,13 +56,57 @@ public class Logger
         this.verbose = verbose;
     }
 
+    public final void mute(boolean mute)
+    {
+        if (mute && this.mute)
+        {
+            if (verbose)
+            {
+                log("Logger is already muted");
+            }
+        }
+        else if (!mute && !this.mute)
+        {
+            if (verbose)
+            {
+                log("Logger is already activated");
+            }
+        }
+        else
+        {
+            this.mute = mute;
+            if (mute)
+            {
+                if (verbose)
+                {
+                    log("Logger muted");
+                }
+            }
+            else
+            {
+                if (verbose)
+                {
+                    log("Logger activated");
+                }
+            }
+        }
+    }
+
     public void log(String log)
     {
+        if (mute)
+        {
+            return;
+        }
         LOGGER.info(log);
     }
 
     public void log(String log, LogsFile... files)
     {
+        if (mute)
+        {
+            return;
+        }
         addLogsFiles(files);
         log(log);
         removeLogsFiles(files);
@@ -69,11 +114,19 @@ public class Logger
 
     public void warn(String warn)
     {
+        if (mute)
+        {
+            return;
+        }
         LOGGER.warning(warn);
     }
 
     public void warn(String warn, LogsFile... files)
     {
+        if (mute)
+        {
+            return;
+        }
         addLogsFiles(files);
         warn(warn);
         removeLogsFiles(files);
@@ -81,6 +134,10 @@ public class Logger
 
     public void warn(Throwable thrown)
     {
+        if (mute)
+        {
+            return;
+        }
         LOGGER.warning(() ->
         {
             final StringBuilder message = new StringBuilder();
@@ -96,6 +153,10 @@ public class Logger
 
     public void warn(Throwable thrown, LogsFile... files)
     {
+        if (mute)
+        {
+            return;
+        }
         addLogsFiles(files);
         warn(thrown);
         removeLogsFiles(files);
@@ -103,6 +164,10 @@ public class Logger
 
     public void warn(String warn, Throwable thrown)
     {
+        if (mute)
+        {
+            return;
+        }
         LOGGER.warning(() ->
         {
             final StringBuilder message = new StringBuilder();
@@ -118,6 +183,10 @@ public class Logger
 
     public void warn(String warn, Throwable thrown, LogsFile... files)
     {
+        if (mute)
+        {
+            return;
+        }
         addLogsFiles(files);
         warn(warn, thrown);
         removeLogsFiles(files);
@@ -125,11 +194,19 @@ public class Logger
 
     public void error(String error)
     {
+        if (mute)
+        {
+            return;
+        }
         LOGGER.severe(error);
     }
 
     public void error(String error, LogsFile... files)
     {
+        if (mute)
+        {
+            return;
+        }
         addLogsFiles(files);
         error(error);
         removeLogsFiles(files);
@@ -137,6 +214,10 @@ public class Logger
 
     public void error(Throwable thrown)
     {
+        if (mute)
+        {
+            return;
+        }
         LOGGER.severe(() ->
         {
             final StringBuilder message = new StringBuilder();
@@ -152,6 +233,10 @@ public class Logger
 
     public void error(Throwable thrown, LogsFile... files)
     {
+        if (mute)
+        {
+            return;
+        }
         addLogsFiles(files);
         error(thrown);
         removeLogsFiles(files);
@@ -159,6 +244,10 @@ public class Logger
 
     public void error(String error, Throwable thrown)
     {
+        if (mute)
+        {
+            return;
+        }
         LOGGER.severe(() ->
         {
             final StringBuilder message = new StringBuilder();
@@ -174,6 +263,10 @@ public class Logger
 
     public void error(String error, Throwable thrown, LogsFile... files)
     {
+        if (mute)
+        {
+            return;
+        }
         addLogsFiles(files);
         error(error, thrown);
         removeLogsFiles(files);
