@@ -2,7 +2,6 @@ package fr.diskmth.loggy;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -10,6 +9,8 @@ import java.util.logging.FileHandler;
 
 public class LogsFile
 {
+    /*---------------------------------------- Variables and constants ----------------------------------------*/
+
     public static final String DATE = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss").format(Calendar.getInstance().getTime());
 
     protected final Logger logger;
@@ -17,12 +18,16 @@ public class LogsFile
     protected final String fileName;
     protected FileHandler fileHandler;
 
+    /*---------------------------------------- Constructors ----------------------------------------*/
+
     public LogsFile(Logger logger, Path path, String fileName)
     {
         this.logger = logger;
         this.path = path;
         this.fileName = fileName;
     }
+
+    /*---------------------------------------- Misc methods ----------------------------------------*/
 
     public void init()
     {
@@ -48,20 +53,54 @@ public class LogsFile
 
     public void close()
     {
-        if (fileHandler != null)
+        if (fileHandler == null)
         {
-            fileHandler.close();
-            final File logsFile = new File(path.toUri().getPath() + File.separatorChar + fileName);
-            if (logsFile.length() == 0 && logsFile.delete() && logger.verbose())
-            {
-                logger.log("Empty logs file " + fileName + " has been deleted");
-            }
-            final File logsDir = new File(path.toUri());
-            if (logsDir.length() == 0 && logsDir.delete() && logger.verbose())
-            {
-                logger.log("Empty logs directory " + path + " has been deleted");
-            }
+            return;
         }
+
+        fileHandler.close();
+        boolean deleted = false;
+        final File logsFile = new File(path.toUri().getPath() + File.separatorChar + fileName);
+
+        while (logsFile.exists() && logsFile.length() == 0)
+        {
+            deleted = logsFile.delete();
+        }
+
+        if (deleted && logger.verbose())
+        {
+            logger.log("Empty logs file " + logsFile.getPath() + " has been deleted");
+        }
+
+        deleted = false;
+        final File logsDir = new File(path.toUri());
+
+        while (logsDir.exists() && logsDir.length() == 0)
+        {
+            deleted = logsDir.delete();
+        }
+
+        if (deleted && logger.verbose())
+        {
+            logger.log("Empty logs directory " + logsDir.getPath() + " has been deleted");
+        }
+    }
+
+    /*---------------------------------------- Getters ----------------------------------------*/
+
+    public Logger getLogger()
+    {
+        return logger;
+    }
+
+    public Path getPath()
+    {
+        return path;
+    }
+
+    public String getFileName()
+    {
+        return fileName;
     }
 
     public FileHandler getFileHandler()

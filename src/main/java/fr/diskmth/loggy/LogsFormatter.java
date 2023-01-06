@@ -8,15 +8,21 @@ import java.util.logging.LogRecord;
 
 public class LogsFormatter extends Formatter
 {
+    /*---------------------------------------- Variables and constants ----------------------------------------*/
+
     public static final LogsFormatter CONSOLE_FORMATTER = new LogsFormatter(false);
     public static final LogsFormatter FILE_FORMATTER = new LogsFormatter(true);
 
     protected final boolean isForFile;
 
+    /*---------------------------------------- Constructors ----------------------------------------*/
+
     protected LogsFormatter(boolean isForFile)
     {
         this.isForFile = isForFile;
     }
+
+    /*---------------------------------------- Misc methods ----------------------------------------*/
 
     @Override
     public String format(LogRecord record)
@@ -72,7 +78,7 @@ public class LogsFormatter extends Formatter
 
     private void colorize(StringBuilder message, String color)
     {
-        if (!isForFile)
+        if (!this.isForFile)
         {
             message.append(color);
         }
