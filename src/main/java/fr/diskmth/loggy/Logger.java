@@ -1,15 +1,16 @@
 package fr.diskmth.loggy;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.logging.ConsoleHandler;
 
 public class Logger
 {
     /*---------------------------------------- Variables and constants ----------------------------------------*/
 
-    private boolean verbose = true;
-    private boolean mute = false;
+    private boolean isMuted = false;
 
-    protected final java.util.logging.Logger LOGGER;
+    protected final java.util.logging.Logger logger;
 
     /*---------------------------------------- Constructors ----------------------------------------*/
 
@@ -20,28 +21,41 @@ public class Logger
             throw new IllegalArgumentException("The logger name can't be empty!");
         }
 
-        LOGGER = java.util.logging.Logger.getLogger(name.trim());
-        LOGGER.setUseParentHandlers(false);
+        logger = java.util.logging.Logger.getLogger(name);
+        logger.setUseParentHandlers(false);
 
         final ConsoleHandler consoleHandler = new ConsoleHandler();
         consoleHandler.setFormatter(LogsFormatter.CONSOLE_FORMATTER);
-        LOGGER.addHandler(consoleHandler);
+        logger.addHandler(consoleHandler);
     }
 
     /*---------------------------------------- Misc methods ----------------------------------------*/
 
+    private String buildStackTrace(Throwable thrown)
+    {
+        final StringBuilder message = new StringBuilder();
+        message.append("    \n").append(thrown).append("\n");
+        for (StackTraceElement trace : thrown.getStackTrace())
+        {
+            message.append("\tat ").append(trace).append("\n");
+        }
+        message.delete(0, 4);
+        message.delete(message.length() - 1, message.length());
+        return message.toString();
+    }
+
     public synchronized Logger log(String log)
     {
-        if (!mute)
+        if (!isMuted)
         {
-            LOGGER.info(log);
+            logger.info(log);
         }
         return this;
     }
 
-    public synchronized Logger log(String log, LogsFile... files)
+    public synchronized Logger log(String log, LogFile... files)
     {
-        if (!mute)
+        if (!isMuted)
         {
             addLogsFiles(files);
             log(log);
@@ -52,16 +66,16 @@ public class Logger
 
     public synchronized Logger warn(String warn)
     {
-        if (!mute)
+        if (!isMuted)
         {
-            LOGGER.warning(warn);
+            logger.warning(warn);
         }
         return this;
     }
 
-    public synchronized Logger warn(String warn, LogsFile... files)
+    public synchronized Logger warn(String warn, LogFile... files)
     {
-        if (!mute)
+        if (!isMuted)
         {
             addLogsFiles(files);
             warn(warn);
@@ -72,26 +86,16 @@ public class Logger
 
     public synchronized Logger warn(Throwable thrown)
     {
-        if (!mute)
+        if (!isMuted)
         {
-            LOGGER.warning(() ->
-            {
-                final StringBuilder message = new StringBuilder();
-                for (StackTraceElement trace : thrown.getStackTrace())
-                {
-                    message.append("    ").append(trace).append("\n");
-                }
-                message.delete(0, 4);
-                message.delete(message.length() - 1, message.length());
-                return message.toString();
-            });
+            logger.warning(buildStackTrace(thrown));
         }
         return this;
     }
 
-    public synchronized Logger warn(Throwable thrown, LogsFile... files)
+    public synchronized Logger warn(Throwable thrown, LogFile... files)
     {
-        if (!mute)
+        if (!isMuted)
         {
             addLogsFiles(files);
             warn(thrown);
@@ -102,26 +106,16 @@ public class Logger
 
     public synchronized Logger warn(String warn, Throwable thrown)
     {
-        if (!mute)
+        if (!isMuted)
         {
-            LOGGER.warning(() ->
-            {
-                final StringBuilder message = new StringBuilder();
-                message.append(warn).append("\n");
-                for (StackTraceElement trace : thrown.getStackTrace())
-                {
-                    message.append("    ").append(trace).append("\n");
-                }
-                message.delete(message.length() - 1, message.length());
-                return message.toString();
-            });
+            logger.warning(warn + buildStackTrace(thrown));
         }
         return this;
     }
 
-    public synchronized Logger warn(String warn, Throwable thrown, LogsFile... files)
+    public synchronized Logger warn(String warn, Throwable thrown, LogFile... files)
     {
-        if (!mute)
+        if (!isMuted)
         {
             addLogsFiles(files);
             warn(warn, thrown);
@@ -132,16 +126,16 @@ public class Logger
 
     public synchronized Logger error(String error)
     {
-        if (!mute)
+        if (!isMuted)
         {
-            LOGGER.severe(error);
+            logger.severe(error);
         }
         return this;
     }
 
-    public synchronized Logger error(String error, LogsFile... files)
+    public synchronized Logger error(String error, LogFile... files)
     {
-        if (!mute)
+        if (!isMuted)
         {
             addLogsFiles(files);
             error(error);
@@ -152,26 +146,16 @@ public class Logger
 
     public synchronized Logger error(Throwable thrown)
     {
-        if (!mute)
+        if (!isMuted)
         {
-            LOGGER.severe(() ->
-            {
-                final StringBuilder message = new StringBuilder();
-                for (StackTraceElement trace : thrown.getStackTrace())
-                {
-                    message.append("    ").append(trace).append("\n");
-                }
-                message.delete(0, 4);
-                message.delete(message.length() - 1, message.length());
-                return message.toString();
-            });
+            logger.severe(buildStackTrace(thrown));
         }
         return this;
     }
 
-    public synchronized Logger error(Throwable thrown, LogsFile... files)
+    public synchronized Logger error(Throwable thrown, LogFile... files)
     {
-        if (!mute)
+        if (!isMuted)
         {
             addLogsFiles(files);
             error(thrown);
@@ -182,26 +166,16 @@ public class Logger
 
     public synchronized Logger error(String error, Throwable thrown)
     {
-        if (!mute)
+        if (!isMuted)
         {
-            LOGGER.severe(() ->
-            {
-                final StringBuilder message = new StringBuilder();
-                message.append(error).append("\n");
-                for (StackTraceElement trace : thrown.getStackTrace())
-                {
-                    message.append("    ").append(trace).append("\n");
-                }
-                message.delete(message.length() - 1, message.length());
-                return message.toString();
-            });
+            logger.severe(error + (buildStackTrace(thrown)));
         }
         return this;
     }
 
-    public synchronized Logger error(String error, Throwable thrown, LogsFile... files)
+    public synchronized Logger error(String error, Throwable thrown, LogFile... files)
     {
-        if (!mute)
+        if (!isMuted)
         {
             addLogsFiles(files);
             error(error, thrown);
@@ -210,75 +184,48 @@ public class Logger
         return this;
     }
 
-    /*---------------------------------------- Setters ----------------------------------------*/
+    /*---------------------------------------- Getters ----------------------------------------*/
 
-    public boolean verbose()
+    public boolean isMuted()
     {
-        return verbose;
+        return isMuted;
     }
 
     /*---------------------------------------- Setters ----------------------------------------*/
 
-    protected void addLogsFiles(LogsFile... files)
+    protected void addLogsFiles(LogFile... files)
     {
-        for (LogsFile file : files)
+        for (LogFile file : files)
         {
             if (file != null)
             {
-                LOGGER.addHandler(file.getFileHandler());
+                logger.addHandler(file.getFileHandler());
             }
         }
     }
 
-    protected void removeLogsFiles(LogsFile... files)
+    protected void removeLogsFiles(LogFile... files)
     {
-        for (LogsFile file : files)
+        for (LogFile file : files)
         {
             if (file != null)
             {
-                LOGGER.removeHandler(file.getFileHandler());
+                logger.removeHandler(file.getFileHandler());
             }
         }
-    }
-
-    public void verbose(boolean verbose)
-    {
-        this.verbose = verbose;
     }
 
     public void mute(boolean mute)
     {
-        if (mute && this.mute)
+        final String status = mute ? "muted" : "activated";
+
+        if (isMuted == mute)
         {
-            if (verbose)
-            {
-                log("Logger is already muted");
-            }
+            warn("Logger \"" + logger.getName() + "\" is already " + status);
+            return;
         }
-        else if (!mute && !this.mute)
-        {
-            if (verbose)
-            {
-                log("Logger is already activated");
-            }
-        }
-        else
-        {
-            this.mute = mute;
-            if (mute)
-            {
-                if (verbose)
-                {
-                    log("Logger muted");
-                }
-            }
-            else
-            {
-                if (verbose)
-                {
-                    log("Logger activated");
-                }
-            }
-        }
+
+        log("Logger \"" + logger.getName() + "\" is now " + status);
+        isMuted = mute;
     }
 }

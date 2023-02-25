@@ -12,14 +12,6 @@ compileJava {
     targetCompatibility = project.property('javaVersion')
 }
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-
-}
-
 jar {
     manifest {
         attributes(
