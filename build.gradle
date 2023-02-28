@@ -32,9 +32,15 @@ task sourceJar(type: Jar) {
     from sourceSets.main.allJava
 }
 
+task javadocJar(type: Jar) {
+    classifier "javadoc"
+    from javadoc
+}
+
 artifacts {
     archives jar
     archives sourceJar
+    archives javadocJar
 }
 
 publishing {
@@ -42,15 +48,16 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
             artifact tasks.sourceJar
-
-            groupId = project.property('groupId')
-            artifactId = project.property('artifactId')
-            version = project.property('version')
-            description = project.property('description')
+            artifact tasks.javadocJar
 
             pom {
                 name = project.property('name')
+                version = project.property('version')
+                description = project.property('description')
                 url = 'https://github.com/Disk-MTH/Loggy'
+                groupId = project.property('groupId')
+                artifactId = project.property('artifactId')
+
                 licenses {
                     license {
                         name = 'GNU General Public License v3.0'
