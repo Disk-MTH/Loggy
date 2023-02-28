@@ -1,8 +1,10 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
 }
 
-group = project.property('group')
+group = project.property('groupId') + project.property('artifactId')
 version = project.property('version')
 archivesBaseName = project.property('fileName')
 
@@ -23,4 +25,65 @@ jar {
                 'Description'   : project.property('description'),
         )
     }
+}
+
+task sourceJar(type: Jar) {
+    classifier "sources"
+    from sourceSets.main.allJava
+}
+
+artifacts {
+    archives jar
+    archives sourceJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact tasks.sourceJar
+
+            groupId = project.property('groupId')
+            artifactId = project.property('artifactId')
+            version = project.property('version')
+            description = project.property('description')
+
+            pom {
+                name = project.property('name')
+                url = 'https://github.com/Disk-MTH/Loggy'
+                licenses {
+                    license {
+                        name = 'GNU General Public License v3.0'
+                        url = 'https:www.gnu.org/licenses/gpl-3.0.html'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'disk_mth'
+                        name = 'Disk_MTH'
+                        email = 'contact.diskmth@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/Disk-MTH/Loggy.git'
+                    developerConnection = 'scm:git:ssh://github.com/Disk-MTH/Loggy.git'
+                    url = 'https://github.com/Disk-MTH/Loggy'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials {
+                username = "$usr"
+                password = "$pwd"
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
 }
