@@ -1,20 +1,19 @@
 package fr.diskmth.loggy;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.logging.ConsoleHandler;
 
-public class Logger
+public class Loggy
 {
     /*---------------------------------------- Variables and constants ----------------------------------------*/
 
-    private boolean isMuted = false;
+    protected boolean isMuted = false;
 
     protected final java.util.logging.Logger logger;
 
     /*---------------------------------------- Constructors ----------------------------------------*/
 
-    public Logger(String name)
+    public Loggy(String name)
     {
         if (name.trim().isEmpty())
         {
@@ -31,20 +30,39 @@ public class Logger
 
     /*---------------------------------------- Misc methods ----------------------------------------*/
 
-    private String buildStackTrace(Throwable thrown)
+    protected synchronized void addLogsFiles(LoggyFile... files)
+    {
+        for (LoggyFile file : files)
+        {
+            if (file != null)
+            {
+                logger.addHandler(file.getFileHandler());
+            }
+        }
+    }
+
+    protected synchronized void removeLogsFiles(LoggyFile... files)
+    {
+        for (LoggyFile file : files)
+        {
+            if (file != null)
+            {
+                logger.removeHandler(file.getFileHandler());
+            }
+        }
+    }
+
+    protected String buildStackTrace(Throwable thrown)
     {
         final StringBuilder message = new StringBuilder();
         message.append("    \n").append(thrown).append("\n");
-        for (StackTraceElement trace : thrown.getStackTrace())
-        {
-            message.append("\tat ").append(trace).append("\n");
-        }
-        message.delete(0, 4);
-        message.delete(message.length() - 1, message.length());
-        return message.toString();
+        Arrays.asList(thrown.getStackTrace()).forEach(trace -> message.append("\tat ").append(trace).append("\n"));
+        return message.delete(0, 4).delete(message.length() - 1, message.length()).toString();
     }
 
-    public synchronized Logger log(String log)
+    /*---------------------------------------- Log methods ----------------------------------------*/
+
+    public synchronized Loggy log(String log)
     {
         if (!isMuted)
         {
@@ -53,7 +71,7 @@ public class Logger
         return this;
     }
 
-    public synchronized Logger log(String log, LogFile... files)
+    public synchronized Loggy log(String log, LoggyFile... files)
     {
         if (!isMuted)
         {
@@ -64,7 +82,7 @@ public class Logger
         return this;
     }
 
-    public synchronized Logger warn(String warn)
+    public synchronized Loggy warn(String warn)
     {
         if (!isMuted)
         {
@@ -73,7 +91,7 @@ public class Logger
         return this;
     }
 
-    public synchronized Logger warn(String warn, LogFile... files)
+    public synchronized Loggy warn(String warn, LoggyFile... files)
     {
         if (!isMuted)
         {
@@ -84,7 +102,7 @@ public class Logger
         return this;
     }
 
-    public synchronized Logger warn(Throwable thrown)
+    public synchronized Loggy warn(Throwable thrown)
     {
         if (!isMuted)
         {
@@ -93,7 +111,7 @@ public class Logger
         return this;
     }
 
-    public synchronized Logger warn(Throwable thrown, LogFile... files)
+    public synchronized Loggy warn(Throwable thrown, LoggyFile... files)
     {
         if (!isMuted)
         {
@@ -104,7 +122,7 @@ public class Logger
         return this;
     }
 
-    public synchronized Logger warn(String warn, Throwable thrown)
+    public synchronized Loggy warn(String warn, Throwable thrown)
     {
         if (!isMuted)
         {
@@ -113,7 +131,7 @@ public class Logger
         return this;
     }
 
-    public synchronized Logger warn(String warn, Throwable thrown, LogFile... files)
+    public synchronized Loggy warn(String warn, Throwable thrown, LoggyFile... files)
     {
         if (!isMuted)
         {
@@ -124,7 +142,7 @@ public class Logger
         return this;
     }
 
-    public synchronized Logger error(String error)
+    public synchronized Loggy error(String error)
     {
         if (!isMuted)
         {
@@ -133,7 +151,7 @@ public class Logger
         return this;
     }
 
-    public synchronized Logger error(String error, LogFile... files)
+    public synchronized Loggy error(String error, LoggyFile... files)
     {
         if (!isMuted)
         {
@@ -144,7 +162,7 @@ public class Logger
         return this;
     }
 
-    public synchronized Logger error(Throwable thrown)
+    public synchronized Loggy error(Throwable thrown)
     {
         if (!isMuted)
         {
@@ -153,7 +171,7 @@ public class Logger
         return this;
     }
 
-    public synchronized Logger error(Throwable thrown, LogFile... files)
+    public synchronized Loggy error(Throwable thrown, LoggyFile... files)
     {
         if (!isMuted)
         {
@@ -164,7 +182,7 @@ public class Logger
         return this;
     }
 
-    public synchronized Logger error(String error, Throwable thrown)
+    public synchronized Loggy error(String error, Throwable thrown)
     {
         if (!isMuted)
         {
@@ -173,7 +191,7 @@ public class Logger
         return this;
     }
 
-    public synchronized Logger error(String error, Throwable thrown, LogFile... files)
+    public synchronized Loggy error(String error, Throwable thrown, LoggyFile... files)
     {
         if (!isMuted)
         {
@@ -192,28 +210,6 @@ public class Logger
     }
 
     /*---------------------------------------- Setters ----------------------------------------*/
-
-    protected void addLogsFiles(LogFile... files)
-    {
-        for (LogFile file : files)
-        {
-            if (file != null)
-            {
-                logger.addHandler(file.getFileHandler());
-            }
-        }
-    }
-
-    protected void removeLogsFiles(LogFile... files)
-    {
-        for (LogFile file : files)
-        {
-            if (file != null)
-            {
-                logger.removeHandler(file.getFileHandler());
-            }
-        }
-    }
 
     public void mute(boolean mute)
     {

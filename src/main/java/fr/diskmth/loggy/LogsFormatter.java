@@ -2,12 +2,19 @@ package fr.diskmth.loggy;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 public class LogsFormatter extends Formatter
 {
+    // logger, timestamp, separators
+    public static final List<StringFormat> DEFAULT_HEADER_FORMAT = List.of(StringFormat.PURPLE_BOLD, StringFormat.CYAN, StringFormat.WHITE_BRIGHT);
+
+    //info, warn, error
+    public static final List<StringFormat> LEVELS_FORMAT = List.of(StringFormat.WHITE_BRIGHT);
+
     /*---------------------------------------- Variables and constants ----------------------------------------*/
 
     public static final LogsFormatter CONSOLE_FORMATTER = new LogsFormatter(false);
@@ -17,7 +24,7 @@ public class LogsFormatter extends Formatter
 
     /*---------------------------------------- Constructors ----------------------------------------*/
 
-    protected LogsFormatter(boolean isForFile)
+    public LogsFormatter(boolean isForFile)
     {
         this.isForFile = isForFile;
     }
@@ -32,45 +39,45 @@ public class LogsFormatter extends Formatter
 
         if (record.getLevel().getName().equals(Level.SEVERE.getName()))
         {
-            logColor = Colors.RED;
+            logColor = StringFormat.RED.getAnsiCode();
         }
         else if (record.getLevel().getName().equals(Level.WARNING.getName()))
         {
-            logColor = Colors.YELLOW;
+            logColor = StringFormat.YELLOW.getAnsiCode();
         }
         else
         {
-            logColor = Colors.GREEN;
+            logColor = StringFormat.GREEN.getAnsiCode();
         }
 
-        colorize(message, Colors.CYAN);
+        colorize(message, StringFormat.CYAN.getAnsiCode());
         message.append("[");
 
-        colorize(message, Colors.PURPLE);
+        colorize(message, StringFormat.PURPLE.getAnsiCode());
         message.append(record.getLoggerName());
 
-        colorize(message, Colors.CYAN);
+        colorize(message, StringFormat.CYAN.getAnsiCode());
         message.append(" | ");
 
-        colorize(message, Colors.WHITE);
+        colorize(message, StringFormat.PURPLE_BRIGHT.getAnsiCode());
         message.append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime()));
 
-        colorize(message, Colors.CYAN);
+        colorize(message, StringFormat.CYAN.getAnsiCode());
         message.append(" | ");
 
         colorize(message, logColor);
         message.append(record.getLevel().getName());
 
-        colorize(message, Colors.CYAN);
+        colorize(message, StringFormat.CYAN.getAnsiCode());
         message.append("]");
 
-        colorize(message, Colors.WHITE);
+        colorize(message, StringFormat.WHITE.getAnsiCode());
         message.append(": ");
 
         colorize(message, !record.getLevel().getName().equals(Level.INFO.getName()) ? logColor : "");
         message.append(record.getMessage());
 
-        colorize(message, Colors.RESET);
+        colorize(message, StringFormat.RESET.getAnsiCode());
         message.append("\n");
 
         return message.toString();
