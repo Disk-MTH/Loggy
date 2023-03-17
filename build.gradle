@@ -5,14 +5,10 @@ plugins {
 }
 
 group = project.property('groupId') + project.property('artifactId')
-version = project.property('version')
+version = project.property('version') + '-' + project.property('javaVersion')
 archivesBaseName = project.property('fileName')
 
-compileJava {
-    options.encoding = "UTF-8"
-    sourceCompatibility = project.property('javaVersion')
-    targetCompatibility = project.property('javaVersion')
-}
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = project.property('javaVersion')
 
 jar {
     manifest {
@@ -27,12 +23,12 @@ jar {
     }
 }
 
-task sourceJar(type: Jar) {
+tasks.register('sourceJar', Jar) {
     classifier "sources"
     from sourceSets.main.allJava
 }
 
-task javadocJar(type: Jar) {
+tasks.register('javadocJar', Jar) {
     classifier "javadoc"
     from javadoc
 }
@@ -54,7 +50,6 @@ publishing {
                 name = project.property('name')
                 version = project.property('version')
                 description = project.property('description')
-                url = 'https://github.com/Disk-MTH/Loggy'
                 groupId = project.property('groupId')
                 artifactId = project.property('artifactId')
 
