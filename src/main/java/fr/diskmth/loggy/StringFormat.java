@@ -88,6 +88,13 @@ public enum StringFormat
         return ansiCode;
     }
 
+    public static StringFormat multiple(StringFormat... formats)
+    {
+        final StringBuilder concatFormats = new StringBuilder();
+        Arrays.asList(formats).forEach(format -> concatFormats.append(format.getAnsiCode()));
+        return StringFormat.valueOf(concatFormats.toString());
+    }
+
     public static String format(String message, StringFormat... formats)
     {
         final StringBuilder formattedMessage = new StringBuilder();

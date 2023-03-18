@@ -3,27 +3,31 @@ package fr.diskmth.loggy;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
 
-public class LoggyFile
+public class LoggyFile extends Muted
 {
     /*---------------------------------------- Variables and constants ----------------------------------------*/
 
     protected final Path path;
+
+    protected LoggyFormatter formatter;
     protected FileHandler fileHandler;
 
     /*---------------------------------------- Constructors ----------------------------------------*/
 
-    public LoggyFile(Path path)
+    public LoggyFile(String path, LoggyFormatter formatter)
     {
-        this.path = path;
+        this.path = Path.of(path);
+        this.formatter = Objects.requireNonNullElse(formatter, LoggyFormatter.DEFAULT);
     }
 
     public LoggyFile(String path)
     {
-        this(Path.of(path));
+        this(path, null);
     }
 
     /*---------------------------------------- Misc methods ----------------------------------------*/
@@ -32,43 +36,45 @@ public class LoggyFile
     {
         if (fileHandler != null)
         {
-            System.out.println(StringFormat.format("The \"%name%\" log file cannot be initialized because it is already!".replace("%name%", getPath().toString()), StringFormat.YELLOW));
-            return this;
+            try
+            {
+                new File(getDir()).mkdirs();
+                fileHandler = new FileHandler(path.toString(), true);
+                fileHandler.setFormatter(new Formatter()
+                {
+                    @Override
+                    public String format(LogRecord record)
+                    {
+                        return formatter.format(LoggyLevel.fromJavaLevel(record.getLevel()), record.getMessage(), record.getMessage());
+                    }
+                });
+            }
+            catch (IOException exception)
+            {
+                System.out.println(StringFormat.format("Failed to initialize the log file \"%name%\"".replace("%name%", getPath().toString()), StringFormat.RED));
+                exception.printStackTrace();
+            }
+
+            clear();
         }
 
-        try
-        {
-            new File(getDir()).mkdirs();
-            fileHandler = new FileHandler(path.toString(), true);
-            fileHandler.setFormatter(LogsFormatter.FILE_FORMATTER);
-        }
-        catch (IOException exception)
-        {
-            System.out.println(StringFormat.format("Failed to initialize the log file \"%name%\"".replace("%name%", getPath().toString()), StringFormat.RED));
-            exception.printStackTrace();
-        }
-
-        clear();
         return this;
     }
 
     public LoggyFile close()
     {
-        if (fileHandler == null)
+        if (fileHandler != null)
         {
-            System.out.println(StringFormat.format("The \"%name%\" log file cannot be closed because it is already!".replace("%name%", getPath().toString()), StringFormat.YELLOW));
-            return this;
+            fileHandler.close();
+            fileHandler = null;
+            clear();
         }
-
-        fileHandler.close();
-        clear();
         return this;
     }
 
     public void clear()
     {
         final File logDir = new File(getDir());
-
         for (File emptyFile : Objects.requireNonNull(logDir.listFiles()))
         {
             if (emptyFile.length() == 0)
@@ -76,7 +82,6 @@ public class LoggyFile
                 emptyFile.delete();
             }
         }
-
         logDir.delete();
     }
 
@@ -92,6 +97,11 @@ public class LoggyFile
         return fileHandler;
     }
 
+    public LoggyFormatter getFormatter()
+    {
+        return formatter;
+    }
+
     public String getDir()
     {
         return path.getParent().toString();
@@ -100,5 +110,13 @@ public class LoggyFile
     public String getFileName()
     {
         return path.getFileName().toString();
+    }
+
+    /*---------------------------------------- Setters ----------------------------------------*/
+
+    public LoggyFile setFormatter(LoggyFormatter formatter)
+    {
+        this.formatter = Objects.requireNonNullElse(formatter, LoggyFormatter.DEFAULT);
+        return this;
     }
 }
