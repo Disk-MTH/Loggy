@@ -3,6 +3,7 @@ package fr.diskmth.loggy;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -19,7 +20,7 @@ public class LoggyFile extends Loggable
     public LoggyFile(String path, LoggyFormatter formatter)
     {
         super(formatter);
-        this.path = Path.of(path);
+        this.path = Paths.get(path);
     }
 
     public LoggyFile(String path)

@@ -30,6 +30,6 @@ public abstract class Loggable
 
     public void setFormatter(LoggyFormatter formatter)
     {
-        this.formatter = Objects.requireNonNullElse(formatter, LoggyFormatter.DEFAULT);
+        this.formatter = formatter != null ? formatter : LoggyFormatter.DEFAULT;
     }
 }

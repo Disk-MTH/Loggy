@@ -17,7 +17,7 @@ public abstract class LoggyFormatter
         @Override
         public HashMap<LoggyLevel, List<ANSI>> levelsFormat()
         {
-            return new HashMap<>()
+            return new HashMap<LoggyLevel, List<ANSI>>()
             {{
                 put(LoggyLevel.FATAL, Arrays.asList
                         (

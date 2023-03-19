@@ -10,25 +10,35 @@ public enum LoggyLevel
 
     public static LoggyLevel fromJavaLevel(Level level)
     {
-        return switch (level.getName())
-                {
-                    case "CONFIG" -> FATAL;
-                    case "SEVERE" -> ERROR;
-                    case "WARNING" -> WARN;
-                    case "INFO" -> INFO;
-                    default -> DEBUG;
-                };
+        switch (level.getName())
+        {
+            case "CONFIG":
+                return FATAL;
+            case "SEVERE":
+                return ERROR;
+            case "WARNING":
+                return WARN;
+            case "INFO":
+                return INFO;
+            default:
+                return DEBUG;
+        }
     }
 
     public Level toJavaLevel()
     {
-        return switch (this)
-                {
-                    case FATAL -> Level.CONFIG;
-                    case ERROR -> Level.SEVERE;
-                    case WARN -> Level.WARNING;
-                    case INFO -> Level.INFO;
-                    default -> Level.FINE;
-                };
+        switch (this)
+        {
+            case FATAL:
+                return Level.CONFIG;
+            case ERROR:
+                return Level.SEVERE;
+            case WARN:
+                return Level.WARNING;
+            case INFO:
+                return Level.INFO;
+            default:
+                return Level.FINE;
+        }
     }
 }
