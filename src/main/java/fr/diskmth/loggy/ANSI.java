@@ -2,9 +2,17 @@ package fr.diskmth.loggy;
 
 import java.util.Arrays;
 
+/**
+ * The ANSI class provides a set of static constants and methods to format console output using ANSI escape codes.
+ *
+ * @author Disk_MTH
+ * @version 1.4
+ * @since Loggy 1.4
+ */
 public class ANSI
 {
     /*---------------------------------------- Static constants ----------------------------------------*/
+
     public static final ANSI RESET = new ANSI("\u001B[0m");
     public static final ANSI BOLD = new ANSI("\u001B[1m");
     public static final ANSI ITALIC = new ANSI("\u001B[3m");
@@ -54,6 +62,12 @@ public class ANSI
 
     /*---------------------------------------- Static methods ----------------------------------------*/
 
+    /**
+     * Concatenates multiple ANSI codes into a single ANSI instance.
+     *
+     * @param formats the different ANSI codes to concatenate
+     * @return an instance of ANSI with all the codes passed in parameters concatenated
+     */
     public static ANSI multiple(ANSI... formats)
     {
         final StringBuilder concatFormats = new StringBuilder();
@@ -61,6 +75,13 @@ public class ANSI
         return new ANSI(concatFormats.toString());
     }
 
+    /**
+     * Formats a string with the specified ANSI codes.
+     *
+     * @param message the string to format
+     * @param formats the ANSI codes to apply to the string
+     * @return the formatted string
+     */
     public static String format(String message, ANSI... formats)
     {
         final StringBuilder formattedMessage = new StringBuilder();
@@ -68,6 +89,12 @@ public class ANSI
         return formattedMessage.append(message).append(ANSI.RESET.getCode()).toString();
     }
 
+    /**
+     * Removes ANSI formatting codes from a string.
+     *
+     * @param message the string to remove the formatting from
+     * @return the string without any ANSI formatting codes
+     */
     public static String clearFormat(String message)
     {
         return message.replaceAll("\033\\[[;\\d]*m", "");
@@ -79,6 +106,11 @@ public class ANSI
 
     /*---------------------------------------- Constructors ----------------------------------------*/
 
+    /**
+     * Creates an instance of ANSI with the specified code.
+     *
+     * @param code the ANSI code to associate with the instance
+     */
     public ANSI(String code)
     {
         this.code = code;
@@ -86,6 +118,11 @@ public class ANSI
 
     /*---------------------------------------- Getters ----------------------------------------*/
 
+    /**
+     * Returns the ANSI code associated with the instance.
+     *
+     * @return the ANSI code
+     */
     public String getCode()
     {
         return code;

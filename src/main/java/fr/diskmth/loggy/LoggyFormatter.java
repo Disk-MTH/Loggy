@@ -8,10 +8,20 @@ import java.util.List;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
+/**
+ * An abstract class for formatting log messages using ANSI codes for color and style.
+ *
+ * @author Disk_MTH
+ * @version 1.4
+ * @since Loggy 1.0
+ */
 public abstract class LoggyFormatter
 {
     /*---------------------------------------- Static constants ----------------------------------------*/
 
+    /**
+     * The default LoggyFormatter with predefined ANSI codes for each log level.
+     */
     public static final LoggyFormatter DEFAULT = new LoggyFormatter()
     {
         @Override
@@ -64,6 +74,12 @@ public abstract class LoggyFormatter
 
     /*---------------------------------------- Static methods ----------------------------------------*/
 
+    /**
+     * Converts a LoggyFormatter to a Java Formatter.
+     *
+     * @param formatter the LoggyFormatter to convert
+     * @return a Java Formatter with the same formatting as the given LoggyFormatter
+     */
     public static Formatter toJavaFormatter(LoggyFormatter formatter)
     {
         return new Formatter()
@@ -78,10 +94,28 @@ public abstract class LoggyFormatter
 
     /*---------------------------------------- Misc methods ----------------------------------------*/
 
+    /**
+     * Returns the ANSI codes for each log level.
+     *
+     * @return a HashMap of LoggyLevel to a List of ANSI codes
+     */
     public abstract HashMap<LoggyLevel, List<ANSI>> levelsFormat();
 
+    /**
+     * Formats a log message using ANSI codes.
+     *
+     * @param level   the log level
+     * @param loggy   the logger name
+     * @param message the log message
+     * @return the formatted log message as a String
+     */
     public abstract String format(LoggyLevel level, String loggy, String message);
 
+    /**
+     * Returns a LoggyFormatter that clears all ANSI codes from the parent LoggyFormatter's output.
+     *
+     * @return a LoggyFormatter that does not use ANSI codes
+     */
     public LoggyFormatter getFileFormatter()
     {
         final LoggyFormatter parent = this;
