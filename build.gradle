@@ -48,10 +48,11 @@ publishing {
 
             pom {
                 name = project.property('name')
-                version = project.property('version') + '-' + project.property('javaVersion')
+                version = project.property('version')
                 description = project.property('description')
                 groupId = project.property('groupId')
                 artifactId = project.property('artifactId')
+                url = 'https://github.com/Disk-MTH/Loggy'
 
                 licenses {
                     license {
