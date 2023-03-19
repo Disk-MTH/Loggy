@@ -48,7 +48,7 @@ publishing {
 
             pom {
                 name = project.property('name')
-                version = project.property('version')
+                version = project.property('version') + '-' + project.property('javaVersion')
                 description = project.property('description')
                 groupId = project.property('groupId')
                 artifactId = project.property('artifactId')
