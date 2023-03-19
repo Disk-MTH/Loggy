@@ -6,6 +6,8 @@ public enum LoggyLevel
 {
     FATAL, ERROR, WARN, INFO, DEBUG;
 
+    /*---------------------------------------- Static methods ----------------------------------------*/
+
     public static LoggyLevel fromJavaLevel(Level level)
     {
         return switch (level.getName())

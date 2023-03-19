@@ -7,12 +7,9 @@ public class ANSI
     /*---------------------------------------- Static constants ----------------------------------------*/
     public static final ANSI RESET = new ANSI("\u001B[0m");
     public static final ANSI BOLD = new ANSI("\u001B[1m");
-    public static final ANSI FAINT = new ANSI("\u001B[2m");
     public static final ANSI ITALIC = new ANSI("\u001B[3m");
     public static final ANSI UNDERLINE = new ANSI("\u001B[4m");
-    public static final ANSI BLINK = new ANSI("\u001B[5m");
     public static final ANSI REVERSE = new ANSI("\u001B[7m");
-    public static final ANSI HIDDEN = new ANSI("\u001B[8m");
     public static final ANSI STRIKETHROUGH = new ANSI("\u001B[9m");
 
 

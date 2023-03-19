@@ -2,51 +2,79 @@ package fr.diskmth.loggy;
 
 import java.util.Arrays;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class Loggy
+public class Loggy extends Loggable
 {
     /*---------------------------------------- Variables and constants ----------------------------------------*/
 
-    protected boolean isMuted = false;
-
-    protected final java.util.logging.Logger logger;
+    protected final Logger logger;
 
     /*---------------------------------------- Constructors ----------------------------------------*/
 
-    public Loggy(String name)
+    public Loggy(String name, LoggyFormatter formatter)
     {
-        if (name.trim().isEmpty())
+        super(formatter);
+        if (name == null || name.trim().isEmpty())
         {
-            throw new IllegalArgumentException("The logger name can't be empty!");
+            throw new IllegalArgumentException("The logger name can't be empty or null!");
         }
 
-        logger = java.util.logging.Logger.getLogger(name);
+        logger = Logger.getLogger(name);
         logger.setUseParentHandlers(false);
 
         final ConsoleHandler consoleHandler = new ConsoleHandler();
-        consoleHandler.setFormatter(LogsFormatter.CONSOLE_FORMATTER);
+        consoleHandler.setFormatter(LoggyFormatter.toJavaFormatter(getFormatter()));
+        consoleHandler.setLevel(Level.ALL);
         logger.addHandler(consoleHandler);
+        logger.setLevel(Level.ALL);
+    }
+
+    public Loggy(String name)
+    {
+        this(name, null);
     }
 
     /*---------------------------------------- Misc methods ----------------------------------------*/
 
-    protected synchronized void addLogsFiles(LoggyFile... files)
+    protected void addLogsFiles(LoggyFile... files)
     {
+        if (files == null)
+        {
+            return;
+        }
+
         for (LoggyFile file : files)
         {
             if (file != null)
             {
+                if (file.getFileHandler() == null)
+                {
+                    System.out.println(ANSI.format("Impossible to add the log file \"%name%\" because it is not initialized!".replace("%name%", file.getPath().toString()), ANSI.YELLOW));
+                    return;
+                }
                 logger.addHandler(file.getFileHandler());
             }
         }
     }
 
-    protected synchronized void removeLogsFiles(LoggyFile... files)
+    protected void removeLogsFiles(LoggyFile... files)
     {
+        if (files == null)
+        {
+            return;
+        }
+
         for (LoggyFile file : files)
         {
             if (file != null)
             {
+                if (file.getFileHandler() == null)
+                {
+                    System.out.println(ANSI.format("Impossible to remove the log file \"%name%\" because it is not initialized!".replace("%name%", file.getPath().toString()), ANSI.YELLOW));
+                    return;
+                }
                 logger.removeHandler(file.getFileHandler());
             }
         }
@@ -54,6 +82,11 @@ public class Loggy
 
     protected String buildStackTrace(Throwable thrown)
     {
+        if (thrown == null)
+        {
+            return "";
+        }
+
         final StringBuilder message = new StringBuilder();
         message.append("    \n").append(thrown).append("\n");
         Arrays.asList(thrown.getStackTrace()).forEach(trace -> message.append("\tat ").append(trace).append("\n"));
@@ -62,166 +95,31 @@ public class Loggy
 
     /*---------------------------------------- Log methods ----------------------------------------*/
 
-    public synchronized Loggy log(String log)
-    {
-        if (!isMuted)
-        {
-            logger.info(log);
-        }
-        return this;
-    }
-
-    public synchronized Loggy log(String log, LoggyFile... files)
+    public Loggy log(String message, Throwable thrown, LoggyLevel level, LoggyFile... files)
     {
         if (!isMuted)
         {
             addLogsFiles(files);
-            log(log);
+            logger.log(level.toJavaLevel(), message + buildStackTrace(thrown));
             removeLogsFiles(files);
         }
         return this;
     }
 
-    public synchronized Loggy warn(String warn)
+    public Loggy log(String message, LoggyLevel level, LoggyFile... files)
     {
-        if (!isMuted)
-        {
-            logger.warning(warn);
-        }
-        return this;
+        return log(message, null, level, files);
     }
 
-    public synchronized Loggy warn(String warn, LoggyFile... files)
+    public Loggy log(Throwable thrown, LoggyLevel level, LoggyFile... files)
     {
-        if (!isMuted)
-        {
-            addLogsFiles(files);
-            warn(warn);
-            removeLogsFiles(files);
-        }
-        return this;
-    }
-
-    public synchronized Loggy warn(Throwable thrown)
-    {
-        if (!isMuted)
-        {
-            logger.warning(buildStackTrace(thrown));
-        }
-        return this;
-    }
-
-    public synchronized Loggy warn(Throwable thrown, LoggyFile... files)
-    {
-        if (!isMuted)
-        {
-            addLogsFiles(files);
-            warn(thrown);
-            removeLogsFiles(files);
-        }
-        return this;
-    }
-
-    public synchronized Loggy warn(String warn, Throwable thrown)
-    {
-        if (!isMuted)
-        {
-            logger.warning(warn + buildStackTrace(thrown));
-        }
-        return this;
-    }
-
-    public synchronized Loggy warn(String warn, Throwable thrown, LoggyFile... files)
-    {
-        if (!isMuted)
-        {
-            addLogsFiles(files);
-            warn(warn, thrown);
-            removeLogsFiles(files);
-        }
-        return this;
-    }
-
-    public synchronized Loggy error(String error)
-    {
-        if (!isMuted)
-        {
-            logger.severe(error);
-        }
-        return this;
-    }
-
-    public synchronized Loggy error(String error, LoggyFile... files)
-    {
-        if (!isMuted)
-        {
-            addLogsFiles(files);
-            error(error);
-            removeLogsFiles(files);
-        }
-        return this;
-    }
-
-    public synchronized Loggy error(Throwable thrown)
-    {
-        if (!isMuted)
-        {
-            logger.severe(buildStackTrace(thrown));
-        }
-        return this;
-    }
-
-    public synchronized Loggy error(Throwable thrown, LoggyFile... files)
-    {
-        if (!isMuted)
-        {
-            addLogsFiles(files);
-            error(thrown);
-            removeLogsFiles(files);
-        }
-        return this;
-    }
-
-    public synchronized Loggy error(String error, Throwable thrown)
-    {
-        if (!isMuted)
-        {
-            logger.severe(error + (buildStackTrace(thrown)));
-        }
-        return this;
-    }
-
-    public synchronized Loggy error(String error, Throwable thrown, LoggyFile... files)
-    {
-        if (!isMuted)
-        {
-            addLogsFiles(files);
-            error(error, thrown);
-            removeLogsFiles(files);
-        }
-        return this;
+        return log(buildStackTrace(thrown), null, level, files);
     }
 
     /*---------------------------------------- Getters ----------------------------------------*/
 
-    public boolean isMuted()
+    public String getName()
     {
-        return isMuted;
-    }
-
-    /*---------------------------------------- Setters ----------------------------------------*/
-
-    public void mute(boolean mute)
-    {
-        final String status = mute ? "muted" : "activated";
-
-        if (isMuted == mute)
-        {
-            warn("Logger \"" + logger.getName() + "\" is already " + status);
-            return;
-        }
-
-        log("Logger \"" + logger.getName() + "\" is now " + status);
-        isMuted = mute;
+        return logger.getName();
     }
 }

@@ -5,24 +5,21 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
+import java.util.logging.Level;
 
-public class LoggyFile extends Muted
+public class LoggyFile extends Loggable
 {
     /*---------------------------------------- Variables and constants ----------------------------------------*/
 
     protected final Path path;
-
-    protected LoggyFormatter formatter;
     protected FileHandler fileHandler;
 
     /*---------------------------------------- Constructors ----------------------------------------*/
 
     public LoggyFile(String path, LoggyFormatter formatter)
     {
+        super(formatter);
         this.path = Path.of(path);
-        this.formatter = Objects.requireNonNullElse(formatter, LoggyFormatter.DEFAULT);
     }
 
     public LoggyFile(String path)
@@ -34,28 +31,21 @@ public class LoggyFile extends Muted
 
     public LoggyFile init()
     {
-        if (fileHandler != null)
+        if (fileHandler == null)
         {
             try
             {
                 new File(getDir()).mkdirs();
                 fileHandler = new FileHandler(path.toString(), true);
-                fileHandler.setFormatter(new Formatter()
-                {
-                    @Override
-                    public String format(LogRecord record)
-                    {
-                        return formatter.format(LoggyLevel.fromJavaLevel(record.getLevel()), record.getMessage(), record.getMessage());
-                    }
-                });
+                fileHandler.setFormatter(LoggyFormatter.toJavaFormatter(formatter.getFileFormatter()));
+                fileHandler.setLevel(Level.ALL);
+                clearLogDir();
             }
             catch (IOException exception)
             {
-                System.out.println(StringFormat.format("Failed to initialize the log file \"%name%\"".replace("%name%", getPath().toString()), StringFormat.RED));
+                System.out.println(ANSI.format("Failed to initialize the log file \"%name%\"".replace("%name%", getPath().toString()), ANSI.RED));
                 exception.printStackTrace();
             }
-
-            clear();
         }
 
         return this;
@@ -67,12 +57,12 @@ public class LoggyFile extends Muted
         {
             fileHandler.close();
             fileHandler = null;
-            clear();
+            clearLogDir();
         }
         return this;
     }
 
-    public void clear()
+    public void clearLogDir()
     {
         final File logDir = new File(getDir());
         for (File emptyFile : Objects.requireNonNull(logDir.listFiles()))
@@ -97,11 +87,6 @@ public class LoggyFile extends Muted
         return fileHandler;
     }
 
-    public LoggyFormatter getFormatter()
-    {
-        return formatter;
-    }
-
     public String getDir()
     {
         return path.getParent().toString();
@@ -110,13 +95,5 @@ public class LoggyFile extends Muted
     public String getFileName()
     {
         return path.getFileName().toString();
-    }
-
-    /*---------------------------------------- Setters ----------------------------------------*/
-
-    public LoggyFile setFormatter(LoggyFormatter formatter)
-    {
-        this.formatter = Objects.requireNonNullElse(formatter, LoggyFormatter.DEFAULT);
-        return this;
     }
 }

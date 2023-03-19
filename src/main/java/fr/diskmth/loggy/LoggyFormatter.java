@@ -5,40 +5,80 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
 
 public abstract class LoggyFormatter
 {
+    /*---------------------------------------- Static constants ----------------------------------------*/
+
     public static final LoggyFormatter DEFAULT = new LoggyFormatter()
     {
         @Override
-        public HashMap<LoggyLevel, List<StringFormat>> levelsFormat()
+        public HashMap<LoggyLevel, List<ANSI>> levelsFormat()
         {
             return new HashMap<>()
             {{
-                put(LoggyLevel.FATAL, Arrays.asList(StringFormat.RED_BOLD, StringFormat.RED));
-                put(LoggyLevel.ERROR, Arrays.asList(StringFormat.RED_BOLD_BRIGHT, StringFormat.RED_BRIGHT));
-                put(LoggyLevel.WARN, Arrays.asList(StringFormat.YELLOW_BOLD, StringFormat.YELLOW));
-                put(LoggyLevel.INFO, Arrays.asList(StringFormat.GREEN_BOLD, StringFormat.WHITE));
-                put(LoggyLevel.DEBUG, Arrays.asList(StringFormat.CYAN_BOLD, StringFormat.CYAN));
+                put(LoggyLevel.FATAL, Arrays.asList
+                        (
+                                ANSI.multiple(ANSI.BOLD, ANSI.REVERSE, ANSI.RED_BRIGHT),
+                                ANSI.RED_BRIGHT
+                        ));
+                put(LoggyLevel.ERROR, Arrays.asList
+                        (
+                                ANSI.multiple(ANSI.BOLD, ANSI.RED),
+                                ANSI.RED
+                        ));
+                put(LoggyLevel.WARN, Arrays.asList
+                        (
+                                ANSI.multiple(ANSI.BOLD, ANSI.YELLOW),
+                                ANSI.YELLOW
+                        ));
+                put(LoggyLevel.INFO, Arrays.asList
+                        (
+                                ANSI.multiple(ANSI.BOLD, ANSI.GREEN),
+                                ANSI.WHITE_BRIGHT
+                        ));
+                put(LoggyLevel.DEBUG, Arrays.asList
+                        (
+                                ANSI.multiple(ANSI.BOLD, ANSI.CYAN),
+                                ANSI.CYAN
+                        ));
             }};
         }
 
         @Override
         public String format(LoggyLevel level, String loggy, String message)
         {
-            return StringFormat.format("[", StringFormat.CYAN_BOLD) +
-                    StringFormat.format(loggy, StringFormat.PURPLE_BRIGHT) +
-                    StringFormat.format(" | ", StringFormat.CYAN_BOLD) +
-                    StringFormat.format(new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()), StringFormat.WHITE_BOLD_BRIGHT) +
-                    StringFormat.format(" | ", StringFormat.CYAN_BOLD) +
-                    StringFormat.format(level.name(), levelsFormat().get(level) != null ? levelsFormat().get(level).get(0) : StringFormat.WHITE_BRIGHT) +
-                    StringFormat.format("]", StringFormat.CYAN_BOLD) +
-                    StringFormat.format(": ", StringFormat.WHITE_BOLD_BRIGHT) +
-                    StringFormat.format(message, levelsFormat().get(level) != null ? levelsFormat().get(level).get(1) : StringFormat.WHITE_BRIGHT);
+            return ANSI.format("[", ANSI.BLUE_BRIGHT) +
+                    ANSI.format(loggy, ANSI.MAGENTA) +
+                    ANSI.format(" | ", ANSI.BLUE_BRIGHT) +
+                    ANSI.format(new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()), ANSI.WHITE) +
+                    ANSI.format(" | ", ANSI.BLUE_BRIGHT) +
+                    ANSI.format(level.name(), levelsFormat().get(level) != null ? levelsFormat().get(level).get(0) : ANSI.WHITE) +
+                    ANSI.format("]", ANSI.BLUE_BRIGHT) +
+                    ANSI.format(": ", ANSI.WHITE) +
+                    ANSI.format(message, levelsFormat().get(level) != null ? levelsFormat().get(level).get(1) : ANSI.WHITE) + "\n";
         }
     };
 
-    public abstract HashMap<LoggyLevel, List<StringFormat>> levelsFormat();
+    /*---------------------------------------- Static methods ----------------------------------------*/
+
+    public static Formatter toJavaFormatter(LoggyFormatter formatter)
+    {
+        return new Formatter()
+        {
+            @Override
+            public String format(LogRecord record)
+            {
+                return formatter.format(LoggyLevel.fromJavaLevel(record.getLevel()), record.getLoggerName(), record.getMessage());
+            }
+        };
+    }
+
+    /*---------------------------------------- Misc methods ----------------------------------------*/
+
+    public abstract HashMap<LoggyLevel, List<ANSI>> levelsFormat();
 
     public abstract String format(LoggyLevel level, String loggy, String message);
 
@@ -49,7 +89,7 @@ public abstract class LoggyFormatter
         return new LoggyFormatter()
         {
             @Override
-            public HashMap<LoggyLevel, List<StringFormat>> levelsFormat()
+            public HashMap<LoggyLevel, List<ANSI>> levelsFormat()
             {
                 return parent.levelsFormat();
             }
@@ -57,7 +97,7 @@ public abstract class LoggyFormatter
             @Override
             public String format(LoggyLevel level, String loggy, String message)
             {
-                return StringFormat.clearFormat(parent.format(level, loggy, message));
+                return ANSI.clearFormat(parent.format(level, loggy, message));
             }
         };
     }
